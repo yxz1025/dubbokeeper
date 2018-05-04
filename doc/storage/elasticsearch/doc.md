@@ -1,0 +1,35 @@
+既然是基于es存储的,索引对应的mapper需要事先创建好，有些ES没有开启自动创建索引的配置，这里系统会自动根据索引进行Mapping创建
+
+### 调整配置参数
+
+```xml
+#dubbo应用名称
+dubbo.application.name=es-monitor
+#dubbo应用所有者
+dubbo.application.owner=bieber
+#dubbo的注册中心地址，保存和被监控应用一个注册中心
+dubbo.registry.address=zookeeper://localhost:2181
+#监控数据收集协议
+dubbo.protocol.name=dubbo
+#监控数据收集协议端口
+dubbo.protocol.port=20884
+
+
+#被监控端同步监控数据周期时间，可不配置，默认是一分钟同步一次
+monitor.collect.interval=100
+#use netty4
+dubbo.provider.transporter=netty4
+#监控数据持久化周期,默认是一分钟,单位是秒
+monitor.write.interval=6000
+
+#es相关信息
+#es地址
+dubbo.monitor.es.host=172.16.150.63
+#es用户名
+dubbo.monitor.es.username=root
+#es用户密码
+dubbo.monitor.es.password=root
+#es对应的别名
+dubbo.monitor.es.cluster.name=lefit
+```
+

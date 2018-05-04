@@ -1,0 +1,17 @@
+/**
+* 应用索引名称为 index_application
+*/
+{
+  "mappings": {
+    "application":{
+      "properties": {
+        "name": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+/**
+* 应用服务索引一对一，索引名称：index_应用名称, 索引类型：statistics_应用名称
+*
+*/
+{
+  "mappings": {
+    "statistics_xxx":{
+      "properties": {
+        "timestamp": {
+          "type":"date",
+          "format":"strict_date_optional_time||epoch_millis"
+        },
+        "serviceInterface": {
+          "type": "keyword"
+        },
+        "method": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "tps":{
+          "type": "float"
+        },
+        "kbps": {
+          "type": "float"
+        },
+        "host": {
+          "type": "keyword"
+        },
+        "elapsed": {
+          "type": "integer"
+        },
+        "concurrent": {
+          "type": "integer"
+        },
+        "input": {
+          "type": "integer"
+        },
+        "output": {
+          "type": "integer"
+        },
+        "successCount": {
+          "type": "integer"
+        },
+        "failureCount": {
+          "type": "integer"
+        },
+        "remoteAddress": {
+          "type": "keyword"
+        },
+        "remoteType": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
