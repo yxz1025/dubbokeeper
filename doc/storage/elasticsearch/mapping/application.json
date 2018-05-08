@@ -5,10 +5,10 @@
   "mappings": {
     "application":{
       "properties": {
-        "name": {
+        "applicationName": {
           "type": "keyword"
         },
-        "type": {
+        "applicationType": {
           "type": "integer"
         }
       }

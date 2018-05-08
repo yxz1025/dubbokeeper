@@ -83,7 +83,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 
 
 	public Long getTimestamp() {
-		return timestamp;
+		return timestamp == null ? 0L : timestamp;
 	}
 
 	public void setTimestamp(Long timestamp) {
@@ -91,7 +91,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public String getServiceInterface() {
-		return serviceInterface;
+		return serviceInterface == null ? "" : serviceInterface;
 	}
 
 	public void setServiceInterface(String serviceInterface) {
@@ -99,7 +99,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public String getMethod() {
-		return method;
+		return method == null ? "" : method;
 	}
 
 	public void setMethod(String method) {
@@ -115,7 +115,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public String getHost() {
-		return host;
+		return host == null ? "" : host;
 	}
 
 	public void setHost(String host) {
@@ -123,7 +123,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public String getApplication() {
-		return application;
+		return application == null ? "" : application;
 	}
 
 	public void setApplication(String application) {
@@ -132,7 +132,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 
 
 	public Long getElapsed() {
-		return elapsed;
+		return elapsed == null ? 0L : elapsed;
 	}
 
 	public void setElapsed(Long elapsed) {
@@ -140,7 +140,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public Long getConcurrent() {
-		return concurrent;
+		return concurrent == null ? 0L : concurrent;
 	}
 
 	public void setConcurrent(Long concurrent) {
@@ -148,7 +148,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public Long getInput() {
-		return input;
+		return input == null ? 0L : input;
 	}
 
 	public void setInput(Long input) {
@@ -156,7 +156,7 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 	}
 
 	public Long getOutput() {
-		return output;
+		return output == null ? 0L : output;
 	}
 
 	public void setOutput(Long output) {

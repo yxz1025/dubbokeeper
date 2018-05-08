@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+        <bean id="statisticsDao" class="com.dubboclub.dk.storage.elasticsearch.dao.StatisticsDao">
+                <property name="elasticTemplate" ref="elasticTemplate"/>
+        </bean>
+        <bean id="applicationDao" class="com.dubboclub.dk.storage.elasticsearch.dao.ApplicationDao">
+                <property name="elasticTemplate" ref="elasticTemplate"/>
+        </bean>
+
+        <bean id="elasticTemplate" class="com.dubboclub.dk.storage.elasticsearch.ElasticTemplate">
+                <property name="cluster" value="${dubbo.monitor.es.cluster.name}"/>
+                <property name="ipAddress" value="${dubbo.monitor.es.host}"/>
+                <property name="username" value="${dubbo.monitor.es.username}"/>
+                <property name="password" value="${dubbo.monitor.es.password}"/>
+        </bean>
+
+        <bean class="com.dubboclub.dk.storage.elasticsearch.ElasticsearchStatisticsStorage" id="elasticsearchStatisticsStorage">
+                <property name="applicationDao" ref="applicationDao"  />
+                <property name="statisticsDao" ref="statisticsDao"  />
+        </bean>
+
+        <dubbo:service interface="com.dubboclub.dk.storage.StatisticsStorage" ref="elasticsearchStatisticsStorage"/>
+
+</beans>
