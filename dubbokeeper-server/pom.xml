@@ -49,10 +49,10 @@
         </dependency>
 
         <!-- nettry -->
-        <dependency>
-            <groupId>net.dubboclub</groupId>
-            <artifactId>netty4</artifactId>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>net.dubboclub</groupId>-->
+            <!--<artifactId>netty4</artifactId>-->
+        <!--</dependency>-->
 
         <!--zookeeper-->
         <dependency>
@@ -82,19 +82,16 @@
     </dependencies>
 
     <profiles>
-        <profile>
-            <id>lucene</id>
-            <dependencies>
-                <dependency>
-                    <groupId>${project.parent.groupId}</groupId>
-                    <artifactId>lucene-storage</artifactId>
-                    <version>${project.parent.version}</version>
-                </dependency>
-            </dependencies>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-        </profile>
+        <!--<profile>-->
+            <!--<id>lucene</id>-->
+            <!--<dependencies>-->
+                <!--<dependency>-->
+                    <!--<groupId>${project.parent.groupId}</groupId>-->
+                    <!--<artifactId>lucene-storage</artifactId>-->
+                    <!--<version>${project.parent.version}</version>-->
+                <!--</dependency>-->
+            <!--</dependencies>-->
+        <!--</profile>-->
         <profile>
             <id>mysql</id>
             <dependencies>

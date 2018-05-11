@@ -34,6 +34,12 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <!--&lt;!&ndash; nettry &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>net.dubboclub</groupId>-->
+            <!--<artifactId>netty4</artifactId>-->
+        <!--</dependency>-->
+
         <!-- commons -->
         <dependency>
             <groupId>commons-dbutils</groupId>

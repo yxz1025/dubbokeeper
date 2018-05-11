@@ -172,6 +172,25 @@ public class Statistics implements Comparable<Statistics>,Serializable {
 		CONSUMER,PROVIDER
 	}
 
-
-	 
+	@Override
+	public String toString() {
+		return "Statistics{" +
+				"timestamp=" + timestamp +
+				", serviceInterface='" + serviceInterface + '\'' +
+				", method='" + method + '\'' +
+				", type=" + type +
+				", tps=" + tps +
+				", kbps=" + kbps +
+				", host='" + host + '\'' +
+				", application='" + application + '\'' +
+				", elapsed=" + elapsed +
+				", concurrent=" + concurrent +
+				", input=" + input +
+				", output=" + output +
+				", successCount=" + successCount +
+				", failureCount=" + failureCount +
+				", remoteAddress='" + remoteAddress + '\'' +
+				", remoteType=" + remoteType +
+				'}';
+	}
 }

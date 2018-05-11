@@ -17,7 +17,6 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,23 +91,14 @@ public class ElasticTemplate {
         Settings.Builder builder = Settings.builder();
         builder.put("cluster.name", cluster);
         builder.put("client.transport.sniff", false);
-        if (this.username != null && !"".equals(this.username)){
-            builder.put("xpack.security.user", username + ":" + password);
-            Settings settings = builder.build();
-            try {
-                client = new PreBuiltXPackTransportClient(settings)
-                        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ipAddress), 9300));
-            } catch (UnknownHostException e) {
-                logger.error("UnknowHost host=[{}], cluster=[{}]", ipAddress, cluster);
-            }
-        }else {
-            Settings settings = builder.build();
-            try {
-                this.client = new PreBuiltTransportClient(settings)
-                        .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(this.ipAddress), 9300));
-            } catch (UnknownHostException e) {
-                logger.error("UnknowHost host=[{}], cluster=[{}]", ipAddress, cluster);
-            }
+
+        builder.put("xpack.security.user", username + ":" + password);
+        Settings settings = builder.build();
+        try {
+            client = new PreBuiltXPackTransportClient(settings)
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(ipAddress), 9300));
+        } catch (UnknownHostException e) {
+            logger.error("UnknowHost host=[{}], cluster=[{}]", ipAddress, cluster);
         }
 
     }

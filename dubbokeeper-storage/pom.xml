@@ -17,7 +17,7 @@
 
     <modules>
         <module>storage-api</module>
-        <module>lucene-storage</module>
+        <!--<module>lucene-storage</module>-->
         <module>mongodb-storage</module>
         <module>mysql-storage</module>
         <module>elasticsearch-storage</module>

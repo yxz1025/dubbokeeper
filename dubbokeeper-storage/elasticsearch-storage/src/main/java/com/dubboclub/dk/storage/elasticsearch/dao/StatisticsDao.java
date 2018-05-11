@@ -44,7 +44,12 @@ public class StatisticsDao extends AbstractEsDao {
         return this;
     }
 
+    private String toLowerCaseApplication(String application){
+        return application.toLowerCase();
+    }
+
     public void createStatisticsMapping(String application){
+        application = toLowerCaseApplication(application);
         boolean result = elasticTemplate.indexExists(STATISTICS_INDEX_PREFIX + application);
         if(!result){
             elasticTemplate.createIndex(STATISTICS_INDEX_PREFIX + application, application, getMapping());
@@ -52,6 +57,7 @@ public class StatisticsDao extends AbstractEsDao {
     }
 
     public void addOne(String application,Statistics statistics){
+        application = toLowerCaseApplication(application);
         elasticTemplate.save(STATISTICS_INDEX_PREFIX + application, application, createObjToJson(statistics));
     }
 
@@ -159,6 +165,7 @@ public class StatisticsDao extends AbstractEsDao {
 
 
     public void batchInsert(String application,List<Statistics> statisticsList){
+        application = toLowerCaseApplication(application);
         List<HashMap<String, Object>> listData = new ArrayList<>();
         statisticsList.stream().forEach(item -> listData.add(createObjToJson(item)));
         elasticTemplate.bulkSave(STATISTICS_INDEX_PREFIX + application, application, listData);
@@ -170,15 +177,15 @@ public class StatisticsDao extends AbstractEsDao {
         boolQueryBuilder.must(QueryBuilders.termQuery("method", method));
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp").format("strict_date_optional_time||epoch_millis").gte(startTime).lte(endTime));
 
-        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application);
-        srb.setTypes(application);
+        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application.toLowerCase());
+        srb.setTypes(application.toLowerCase());
         srb.setQuery(boolQueryBuilder);
         srb.setFrom(0).setSize(PAGE_SIZE);
         SearchResponse sr = srb.execute().actionGet();
         //获取结果集
         SearchHit[] hits = sr.getHits().getHits();
         List<Statistics>  statisticses = new ArrayList<>();
-        Arrays.stream(hits).forEach(item -> processResultHitsItem(statisticses, item, application));
+        Arrays.stream(hits).forEach(item -> processResultHitsItem(statisticses, item, application.toLowerCase()));
         return statisticses;
     }
 
@@ -189,6 +196,7 @@ public class StatisticsDao extends AbstractEsDao {
      * @return
      */
     public List<TempMethodOveride> findMethodForService(String application, String serviceInterface){
+        application = toLowerCaseApplication(application);
         List<TempMethodOveride>  tempMethodOverides = new ArrayList<>();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery("serviceInterface", serviceInterface));
@@ -220,6 +228,7 @@ public class StatisticsDao extends AbstractEsDao {
      * @param endTime
      */
     public Statistics findMethodMaxItemByService(String column,String application, String serviceInterface, String method, long startTime, long endTime){
+        application = toLowerCaseApplication(application);
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery("serviceInterface", serviceInterface));
         boolQueryBuilder.must(QueryBuilders.termQuery("method", method));
@@ -234,7 +243,8 @@ public class StatisticsDao extends AbstractEsDao {
         //获取结果集
         SearchHit[] hits = sr.getHits().getHits();
         List<Statistics> statisticses = new ArrayList<>();
-        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application));
+        String finalApplication = application;
+        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, finalApplication));
         return statisticses != null && statisticses.size() > 0 ? statisticses.get(0) : null;
     }
 
@@ -252,8 +262,8 @@ public class StatisticsDao extends AbstractEsDao {
         List<Statistics> statisticsList = new ArrayList<>();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp").format("strict_date_optional_time||epoch_millis").gte(startTime).lte(endTime));
-        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application);
-        srb.setTypes(application);
+        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application.toLowerCase());
+        srb.setTypes(application.toLowerCase());
         srb.setQuery(boolQueryBuilder);
         srb.setFrom(0).setSize(200);
         srb.addSort(item, SortOrder.DESC);
@@ -262,7 +272,7 @@ public class StatisticsDao extends AbstractEsDao {
         //获取结果集
         SearchHit[] hits = sr.getHits().getHits();
         List<Statistics>  statisticses = new ArrayList<>();
-        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application));
+        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application.toLowerCase()));
         return statisticses;
     }
 
@@ -280,8 +290,8 @@ public class StatisticsDao extends AbstractEsDao {
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.must(QueryBuilders.termQuery("serviceInterface", service));
         boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp").format("strict_date_optional_time||epoch_millis").gte(startTime).lte(endTime));
-        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application);
-        srb.setTypes(application);
+        SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application.toLowerCase());
+        srb.setTypes(application.toLowerCase());
         srb.setQuery(boolQueryBuilder);
         srb.setFrom(0).setSize(200);
         srb.addSort(item, SortOrder.DESC);
@@ -290,7 +300,7 @@ public class StatisticsDao extends AbstractEsDao {
         //获取结果集
         SearchHit[] hits = sr.getHits().getHits();
         List<Statistics> statisticses = new ArrayList<>();
-        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application));
+        Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application.toLowerCase()));
         return statisticses;
     }
 
@@ -301,6 +311,7 @@ public class StatisticsDao extends AbstractEsDao {
      * @return
      */
     public List<ServiceInfo> findServiceByApp(String application){
+        application = toLowerCaseApplication(application);
         List<ServiceInfo> serviceInfos = new ArrayList<>();
         SearchRequestBuilder srb = elasticTemplate.getClient().prepareSearch(STATISTICS_INDEX_PREFIX + application);
         srb.setTypes(application);
@@ -333,6 +344,7 @@ public class StatisticsDao extends AbstractEsDao {
      * @return
      */
     public Statistics queryMaxItemByService(String application,String service,String item,long startTime,long endTime){
+        application = toLowerCaseApplication(application);
         List<Statistics> statisticsList = new ArrayList<>();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         if(service != null){

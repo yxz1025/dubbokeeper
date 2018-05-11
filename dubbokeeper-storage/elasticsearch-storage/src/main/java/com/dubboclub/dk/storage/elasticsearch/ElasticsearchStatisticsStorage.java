@@ -1,5 +1,6 @@
 package com.dubboclub.dk.storage.elasticsearch;
 
+import com.alibaba.fastjson.JSON;
 import com.dubboclub.dk.storage.StatisticsStorage;
 import com.dubboclub.dk.storage.elasticsearch.dao.ApplicationDao;
 import com.dubboclub.dk.storage.elasticsearch.dao.StatisticsDao;
@@ -17,8 +18,11 @@ import com.dubboclub.dk.storage.elasticsearch.dto.TempMethodOveride;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+
 import org.apache.commons.lang.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 /**
@@ -31,7 +35,8 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class ElasticsearchStatisticsStorage implements StatisticsStorage,InitializingBean {
 
-    private static final ConcurrentHashMap<String,ApplicationStatisticsStorage> APPLICATION_STORAGES = new ConcurrentHashMap<String, ApplicationStatisticsStorage>();
+    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchStatisticsStorage.class);
+    private static final ConcurrentHashMap<String,Future<ApplicationStatisticsStorage>> APPLICATION_STORAGES = new ConcurrentHashMap<String, Future<ApplicationStatisticsStorage>>();
 
     private ApplicationDao applicationDao;
     private StatisticsDao statisticsDao;
@@ -54,16 +59,42 @@ public class ElasticsearchStatisticsStorage implements StatisticsStorage,Initial
 
     @Override
     public void storeStatistics(Statistics statistics) {
-        if(!APPLICATION_STORAGES.containsKey(statistics.getApplication().toLowerCase())){
-            ApplicationStatisticsStorage applicationStatisticsStorage  = new ApplicationStatisticsStorage(applicationDao,statisticsDao,
-                    statistics.getApplication(),
-                    statistics.getType()== Statistics.ApplicationType.CONSUMER?0:1,true);
-            ApplicationStatisticsStorage old = APPLICATION_STORAGES.putIfAbsent(statistics.getApplication().toLowerCase(),applicationStatisticsStorage);
-            if(old==null){
-                applicationStatisticsStorage.start();
+        logger.info("collector for send message = {}", JSON.toJSONString(statistics));
+        String key = statistics.getApplication().toLowerCase();
+        Future<ApplicationStatisticsStorage> future = APPLICATION_STORAGES.get(key);
+
+        if (future == null){
+            Callable<ApplicationStatisticsStorage> callable = new Callable<ApplicationStatisticsStorage>() {
+                @Override
+                public ApplicationStatisticsStorage call() throws Exception {
+                    return new ApplicationStatisticsStorage(applicationDao,statisticsDao,
+                            statistics.getApplication(),
+                            statistics.getType()== Statistics.ApplicationType.CONSUMER?0:1,true);
+                }
+            };
+
+            FutureTask<ApplicationStatisticsStorage> task = new FutureTask<ApplicationStatisticsStorage>(callable);
+            future = APPLICATION_STORAGES.putIfAbsent(key, task);
+
+            if (future == null){
+                future = task;
+                task.run();
+                try {
+                    future.get().start();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
         }
-        APPLICATION_STORAGES.get(statistics.getApplication().toLowerCase()).addStatistics(statistics);
+        try {
+            future.get().addStatistics(statistics);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -105,7 +136,15 @@ public class ElasticsearchStatisticsStorage implements StatisticsStorage,Initial
     public Collection<ApplicationInfo> queryApplications() {
         List<ApplicationInfo>  applicationInfos = applicationDao.findAll();
         for(ApplicationInfo applicationInfo:applicationInfos){
-            ApplicationStatisticsStorage applicationStatisticsStorage =APPLICATION_STORAGES.get(applicationInfo.getApplicationName());
+            String key = applicationInfo.getApplicationName();
+            ApplicationStatisticsStorage applicationStatisticsStorage = null;
+            try {
+                applicationStatisticsStorage = APPLICATION_STORAGES.get(key).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             if(applicationStatisticsStorage!=null){
                 applicationInfo.setMaxConcurrent(applicationStatisticsStorage.getMaxConcurrent());
                 applicationInfo.setMaxElapsed(applicationStatisticsStorage.getMaxElapsed());
@@ -120,7 +159,14 @@ public class ElasticsearchStatisticsStorage implements StatisticsStorage,Initial
     public ApplicationInfo queryApplicationInfo(String application, long start, long end) {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ApplicationStatisticsStorage applicationStatisticsStorage = APPLICATION_STORAGES.get(application);
+        ApplicationStatisticsStorage applicationStatisticsStorage = null;
+        try {
+            applicationStatisticsStorage = APPLICATION_STORAGES.get(application).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.setApplicationName(applicationStatisticsStorage.getApplication());
         applicationInfo.setApplicationType(applicationStatisticsStorage.getType());
@@ -252,7 +298,18 @@ public class ElasticsearchStatisticsStorage implements StatisticsStorage,Initial
             ApplicationStatisticsStorage applicationStatisticsStorage  = new ApplicationStatisticsStorage(applicationDao,statisticsDao,
                     app.getApplicationName(),
                     app.getApplicationType());
-            APPLICATION_STORAGES.put(app.getApplicationName(),applicationStatisticsStorage);
+            Callable<ApplicationStatisticsStorage> callable = new Callable<ApplicationStatisticsStorage>() {
+                @Override
+                public ApplicationStatisticsStorage call() throws Exception {
+                    return new ApplicationStatisticsStorage(applicationDao,statisticsDao,
+                            app.getApplicationName(),
+                            app.getApplicationType());
+                }
+            };
+
+            FutureTask<ApplicationStatisticsStorage> task = new FutureTask<ApplicationStatisticsStorage>(callable);
+            APPLICATION_STORAGES.put(app.getApplicationName(),task);
+            task.run();
             applicationStatisticsStorage.start();
             LOGGER.info("start application [{}] storage",app.getApplicationName());
         }
