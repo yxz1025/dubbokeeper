@@ -1,7 +1,9 @@
 package com.dubboclub.dk.storage.elasticsearch;
 
 import com.alibaba.fastjson.JSONObject;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingRequest;
@@ -134,8 +136,10 @@ public class ElasticTemplate {
     public void createIndex(String index, String type, XContentBuilder mapping){
         //构建一个Index（索引）
         CreateIndexRequest request = new CreateIndexRequest(index);
-        client.admin().indices().create(request);
-        createMapping(index, type, mapping);
+        ActionFuture<CreateIndexResponse> responseActionFuture = client.admin().indices().create(request);
+        if (responseActionFuture.actionGet().isAcknowledged()){
+            createMapping(index, type, mapping);
+        }
     }
 
     private void createMapping(String index, String type, XContentBuilder mapping){

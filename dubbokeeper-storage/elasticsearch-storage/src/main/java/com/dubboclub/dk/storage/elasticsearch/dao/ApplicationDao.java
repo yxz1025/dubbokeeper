@@ -77,11 +77,6 @@ public class ApplicationDao extends AbstractEsDao {
     }
 
     public void addApplication(ApplicationInfo applicationInfo){
-        boolean result = elasticTemplate.indexExists(INDEX_APPLICATION);
-        if(!result){
-            elasticTemplate.createIndex(INDEX_APPLICATION, TYPE, getMapping());
-        }
-
         //插入数据
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("applicationName", applicationInfo.getApplicationName());
@@ -89,17 +84,26 @@ public class ApplicationDao extends AbstractEsDao {
         elasticTemplate.save(INDEX_APPLICATION, TYPE, map);
     }
 
+    public void createApplicationMapping(){
+        boolean result = elasticTemplate.indexExists(INDEX_APPLICATION);
+        if(!result){
+            elasticTemplate.createIndex(INDEX_APPLICATION, TYPE, getMapping());
+        }
+    }
+
     @Override
     public XContentBuilder getMapping() {
         XContentBuilder mapping = null;
         try {
             mapping = jsonBuilder()
+                    .startObject()
                     .startObject("properties")
                     .startObject("applicationName")
                     .field("type", "keyword")
                     .endObject()
                     .startObject("applicationType")
                     .field("type", "integer")
+                    .endObject()
                     .endObject()
                     .endObject();
         } catch (IOException e) {

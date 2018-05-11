@@ -44,11 +44,14 @@ public class StatisticsDao extends AbstractEsDao {
         return this;
     }
 
-    public void addOne(String application,Statistics statistics){
+    public void createStatisticsMapping(String application){
         boolean result = elasticTemplate.indexExists(STATISTICS_INDEX_PREFIX + application);
         if(!result){
             elasticTemplate.createIndex(STATISTICS_INDEX_PREFIX + application, application, getMapping());
         }
+    }
+
+    public void addOne(String application,Statistics statistics){
         elasticTemplate.save(STATISTICS_INDEX_PREFIX + application, application, createObjToJson(statistics));
     }
 
@@ -98,6 +101,7 @@ public class StatisticsDao extends AbstractEsDao {
         XContentBuilder mapping = null;
         try {
             mapping = jsonBuilder()
+                    .startObject()
                     .startObject("properties")
                         .startObject("timestamp")
                             .field("type", "date")
@@ -145,6 +149,7 @@ public class StatisticsDao extends AbstractEsDao {
                         .startObject("remoteType")
                             .field("type", "keyword")
                         .endObject()
+                    .endObject()
                     .endObject();
         } catch (IOException e) {
             e.printStackTrace();
@@ -154,11 +159,6 @@ public class StatisticsDao extends AbstractEsDao {
 
 
     public void batchInsert(String application,List<Statistics> statisticsList){
-        boolean result = elasticTemplate.indexExists(STATISTICS_INDEX_PREFIX + application);
-        if(!result){
-            elasticTemplate.createIndex(STATISTICS_INDEX_PREFIX + application, application, getMapping());
-        }
-
         List<HashMap<String, Object>> listData = new ArrayList<>();
         statisticsList.stream().forEach(item -> listData.add(createObjToJson(item)));
         elasticTemplate.bulkSave(STATISTICS_INDEX_PREFIX + application, application, listData);
@@ -235,7 +235,7 @@ public class StatisticsDao extends AbstractEsDao {
         SearchHit[] hits = sr.getHits().getHits();
         List<Statistics> statisticses = new ArrayList<>();
         Arrays.stream(hits).forEach(source -> processResultHitsItem(statisticses, source, application));
-        return statisticses.get(0);
+        return statisticses != null && statisticses.size() > 0 ? statisticses.get(0) : null;
     }
 
 
@@ -350,6 +350,6 @@ public class StatisticsDao extends AbstractEsDao {
             processResultHitsItem(statisticsList, hits[0], application);
         }
 
-        return statisticsList.get(0);
+        return statisticsList != null && statisticsList.size() > 0 ? statisticsList.get(0) : null;
     }
 }
