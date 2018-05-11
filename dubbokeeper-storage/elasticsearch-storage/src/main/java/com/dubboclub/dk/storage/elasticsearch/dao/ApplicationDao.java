@@ -27,13 +27,8 @@ public class ApplicationDao extends AbstractEsDao {
 
     private ElasticTemplate elasticTemplate;
 
-    public ElasticTemplate getElasticTemplate() {
-        return elasticTemplate;
-    }
-
-    public ApplicationDao setElasticTemplate(ElasticTemplate elasticTemplate) {
+    public ApplicationDao(ElasticTemplate elasticTemplate) {
         this.elasticTemplate = elasticTemplate;
-        return this;
     }
 
     public void updateAppType(String application, int type){

@@ -9,8 +9,8 @@
         <bean id="statisticsDao" class="com.dubboclub.dk.storage.elasticsearch.dao.StatisticsDao">
                 <property name="elasticTemplate" ref="elasticTemplate"/>
         </bean>
-        <bean id="applicationDao" class="com.dubboclub.dk.storage.elasticsearch.dao.ApplicationDao">
-                <property name="elasticTemplate" ref="elasticTemplate"/>
+        <bean id="applicationDao" class="com.dubboclub.dk.storage.elasticsearch.dao.ApplicationDao" init-method="createApplicationMapping">
+                <constructor-arg name="elasticTemplate" ref="elasticTemplate"/>
         </bean>
 
         <bean id="elasticTemplate" class="com.dubboclub.dk.storage.elasticsearch.ElasticTemplate">

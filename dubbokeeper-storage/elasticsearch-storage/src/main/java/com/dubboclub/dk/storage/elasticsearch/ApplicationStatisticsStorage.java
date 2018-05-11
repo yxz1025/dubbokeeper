@@ -41,6 +41,7 @@ public class ApplicationStatisticsStorage extends AbstractApplicationStatisticsS
             applicationInfo.setApplicationName(application);
             applicationInfo.setApplicationType(type);
             this.applicationDao.addApplication(applicationInfo);
+            this.statisticsDao.createStatisticsMapping(application);
         }
         init();
         this.type = type;
